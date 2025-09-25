@@ -1,0 +1,25 @@
+{
+  "name": "video-sharing-app-backend",
+  "version": "1.0.0",
+  "description": "A backend for a video sharing application",
+  "keywords": [
+    "backend",
+    "video",
+    "typescript"
+  ],
+  "homepage": "https://github.com/zoanig/video-sharing-application-backend#readme",
+  "bugs": {
+    "url": "https://github.com/zoanig/video-sharing-application-backend/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/zoanig/video-sharing-application-backend.git"
+  },
+  "license": "MIT",
+  "author": "Muhammad Hassan",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
