@@ -28,7 +28,6 @@ const userSchema = new mongoose.Schema(
         ref: "Video",
       },
     ],
-    refreshToken: String,
     role: {
       type: String,
       enum: ["user", "admin"],

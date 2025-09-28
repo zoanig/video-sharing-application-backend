@@ -2,6 +2,7 @@ import "dotenv/config";
 import connectDB from "./db";
 import { PORT } from "./constants";
 import { app } from "./app";
+import * as requser from "./types/express/";
 
 connectDB()
   .then(() => {
