@@ -5,9 +5,7 @@ import { ApiError } from "../utils/ApiError";
 export default (schema: ZodObject) =>
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      schema.parse({
-        body: req.body,
-      });
+      schema.parse(req.body);
       next();
     } catch (err) {
       if (err instanceof ZodError) {
