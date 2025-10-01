@@ -1,5 +1,7 @@
+import mongoose from "mongoose";
 import { Video } from "../models/video.model";
 import { payload } from "../types";
+import { ApiError } from "../utils/ApiError";
 
 export const storeVideo = async (
   user: payload,
@@ -17,4 +19,39 @@ export const storeVideo = async (
   });
   await savedVid.save();
   return savedVid;
+};
+
+export const getVideoInfo = async (vidId: mongoose.Types.ObjectId) => {
+  try {
+    return await Video.findById(vidId).orFail();
+  } catch (err: unknown) {
+    if (err instanceof mongoose.Error.DocumentNotFoundError) {
+      throw new ApiError(404, "Video Not Found");
+    } else {
+      throw new ApiError(500, "An error occured while searching the db");
+    }
+  }
+};
+
+export const updateVideoInfo = async (
+  vidId: mongoose.Types.ObjectId,
+  updtdInfo: { thumbnail?: string; description?: string; title?: string }
+) => {
+  try {
+    const updatingItems = Object.fromEntries(
+      Object.entries(updtdInfo).filter(
+        ([key, value]) => value !== undefined || null
+      )
+    );
+    const updatedVid = await Video.findByIdAndUpdate(vidId, updatingItems, {
+      new: true,
+    }).orFail();
+    return updatedVid;
+  } catch (err: unknown) {
+    if (err instanceof mongoose.Error.DocumentNotFoundError) {
+      throw new ApiError(404, "Video Not Found");
+    } else {
+      throw new ApiError(500, "An error occured while updating the video");
+    }
+  }
 };

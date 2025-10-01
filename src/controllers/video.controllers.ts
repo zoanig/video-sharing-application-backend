@@ -1,8 +1,21 @@
 import { Request, Response } from "express";
-import { payload, videoUploadType } from "../types";
+import {
+  payload,
+  videoUpdateParamsType,
+  videoUpdateType,
+  videoUploadType,
+} from "../types";
 import { ApiError } from "../utils/ApiError";
-import { uploadtoCloudnary } from "../utils/cloudinary";
-import { storeVideo } from "../services/video.services";
+import {
+  deleteFromCloudinary,
+  getPublicId,
+  uploadtoCloudnary,
+} from "../utils/cloudinary";
+import {
+  getVideoInfo,
+  storeVideo,
+  updateVideoInfo,
+} from "../services/video.services";
 import mongoose from "mongoose";
 import { ApiResponse } from "../utils/ApiResponse";
 
@@ -39,13 +52,11 @@ export const publishVideo = async (
       title,
       description
     );
-    return res
-      .status(201)
-      .json(
-        new ApiResponse(201, "File Uploaded Successfully", {
-          videoId: savedVid._id,
-        })
-      );
+    return res.status(201).json(
+      new ApiResponse(201, "File Uploaded Successfully", {
+        videoId: savedVid._id,
+      })
+    );
   } catch (err: unknown) {
     let message = "Something Went Wrong";
     let code = 500;
@@ -55,5 +66,54 @@ export const publishVideo = async (
       message = "Error occured while storing vid in db";
     }
     return res.status(code).json(new ApiError(code, message, [err]));
+  }
+};
+
+export const updateVideoInfoC = async (
+  req: Request<videoUpdateParamsType, {}, videoUpdateType>,
+  res: Response
+) => {
+  try {
+    const vidId = new mongoose.Types.ObjectId(req.params.vidId);
+    const { title, description } = req.body;
+    const thumbnail = req.file;
+
+    if (title || description || thumbnail) {
+      const updatePayload: Record<string, any> = {};
+
+      if (title) updatePayload.title = title;
+      if (description) updatePayload.description = description;
+
+      if (thumbnail) {
+        const videoInfo = await getVideoInfo(vidId);
+        await deleteFromCloudinary(getPublicId(videoInfo.thumbnail));
+        const updatedThumbnail = await uploadtoCloudnary(
+          thumbnail.path,
+          "thumbnail"
+        );
+        updatePayload.thumbnail = updatedThumbnail.url;
+      }
+
+      const updatedVideo = await updateVideoInfo(vidId, updatePayload);
+
+      return res
+        .status(200)
+        .json(
+          new ApiResponse(200, "Successfully updated the video Info", { vidId })
+        );
+    } else {
+      throw new ApiError(400, "Nothing to update");
+    }
+  } catch (err: unknown) {
+    if (err instanceof ApiError) {
+      return res.status(err.statusCode).json(err);
+    } else if (
+      err instanceof Error &&
+      (err.message === "cloudinaryErr" || err.message === "cloudinaryDelErr")
+    ) {
+      return res.status(500).json(new ApiError(500, "cloudinary error"));
+    } else {
+      return res.status(500).json(new ApiError(500));
+    }
   }
 };
