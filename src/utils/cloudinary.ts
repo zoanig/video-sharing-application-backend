@@ -19,3 +19,16 @@ export const uploadtoCloudnary = async (localfile: string, folder: string) => {
     throw new Error("cloudinaryErr");
   }
 };
+
+export const getPublicId = (imageURL: string) =>
+  imageURL.split("/").pop()!.split(".")[0];
+
+export const deleteFromCloudinary = async (pubId: string) => {
+  try {
+    await cloudinary.uploader.destroy(pubId, {
+      invalidate: true,
+    });
+  } catch (err: any) {
+    throw new Error("cloudinaryDelErr");
+  }
+};
