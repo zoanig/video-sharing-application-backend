@@ -20,12 +20,25 @@ export const uploadtoCloudnary = async (localfile: string, folder: string) => {
   }
 };
 
-export const getPublicId = (imageURL: string) =>
-  imageURL.split("/").pop()!.split(".")[0];
+export const getPublicId = (url: string) => {
+  const cleanUrl = url.split("?")[0];
+  const parts = cleanUrl.split("/upload/");
+  if (parts.length < 2) return "";
+  const afterUpload = parts[1];
+  const withoutVersion = afterUpload.replace(/^v[0-9]+\//, "");
+  return (
+    withoutVersion.substring(0, withoutVersion.lastIndexOf(".")) ||
+    withoutVersion
+  );
+};
 
-export const deleteFromCloudinary = async (pubId: string) => {
+export const deleteFromCloudinary = async (
+  pubId: string,
+  resourceType: "image" | "video" = "image"
+) => {
   try {
     await cloudinary.uploader.destroy(pubId, {
+      resource_type: resourceType,
       invalidate: true,
     });
   } catch (err: any) {
