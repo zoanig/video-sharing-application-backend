@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { Video } from "../models/video.model";
 import { payload } from "../types";
 import { ApiError } from "../utils/ApiError";
+import bcrypt from "bcrypt";
 
 export const storeVideo = async (
   user: payload,
@@ -52,6 +53,41 @@ export const updateVideoInfo = async (
       throw new ApiError(404, "Video Not Found");
     } else {
       throw new ApiError(500, "An error occured while updating the video");
+    }
+  }
+};
+
+export const deleteVideoFromDb = async (
+  vidId: mongoose.Types.ObjectId,
+  password: string
+) => {
+  try {
+    const video = await Video.findById(vidId).orFail();
+    const videoInfo = await Video.aggregate([
+      { $match: { _id: vidId } },
+      {
+        $lookup: {
+          from: "users",
+          localField: "owner",
+          foreignField: "_id",
+          as: "owner",
+        },
+      },
+    ]);
+    if (!videoInfo || !videoInfo[0].owner[0].password) {
+      throw new ApiError(500, "Error occured while lookup");
+    }
+    if (!(await bcrypt.compare(password, videoInfo[0].owner[0].password))) {
+      throw new ApiError(401, "Incorrect Password");
+    }
+    await Video.findByIdAndDelete(vidId).orFail();
+  } catch (err: unknown) {
+    if (err instanceof ApiError) {
+      throw err;
+    } else if (err instanceof mongoose.Error.DocumentNotFoundError) {
+      throw new ApiError(404, "No such video exists with the provided id");
+    } else {
+      throw new ApiError(500);
     }
   }
 };

@@ -3,6 +3,7 @@ import { upload } from "../middlewares/multer.middleware";
 import validateRequest from "../middlewares/validateRequest";
 import { videoUploadSchema } from "../validators/videoUpload";
 import {
+  deleteVideoC,
   publishVideo,
   updateVideoInfoC,
 } from "../controllers/video.controllers";
@@ -12,6 +13,7 @@ import {
   videoUpdateSchema,
 } from "../validators/videoUpdate";
 import validateParams from "../middlewares/validateParams";
+import { videoDeleteSchema } from "../validators/videoDelete";
 
 const router = Router();
 
@@ -39,6 +41,14 @@ router.put(
   validateParams(videoUpdateParamsSchema),
   validateRequest(videoUpdateSchema),
   updateVideoInfoC
+);
+
+router.delete(
+  "/delete/:vidId",
+  authorizeUser(["user", "admin"]),
+  validateRequest(videoDeleteSchema),
+  validateParams(videoUpdateParamsSchema),
+  deleteVideoC
 );
 
 export default router;

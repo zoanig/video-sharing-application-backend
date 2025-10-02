@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import {
   payload,
+  videoDeleteType,
   videoUpdateParamsType,
   videoUpdateType,
   videoUploadType,
@@ -12,6 +13,7 @@ import {
   uploadtoCloudnary,
 } from "../utils/cloudinary";
 import {
+  deleteVideoFromDb,
   getVideoInfo,
   storeVideo,
   updateVideoInfo,
@@ -111,6 +113,31 @@ export const updateVideoInfoC = async (
       err instanceof Error &&
       (err.message === "cloudinaryErr" || err.message === "cloudinaryDelErr")
     ) {
+      return res.status(500).json(new ApiError(500, "cloudinary error"));
+    } else {
+      return res.status(500).json(new ApiError(500));
+    }
+  }
+};
+
+export const deleteVideoC = async (
+  req: Request<videoUpdateParamsType, {}, videoDeleteType>,
+  res: Response
+) => {
+  try {
+    const { password } = req.body;
+    const vidId = new mongoose.Types.ObjectId(req.params.vidId);
+    const videoInfo = await getVideoInfo(vidId);
+    await deleteFromCloudinary(getPublicId(videoInfo.videoSrc), "video");
+    await deleteFromCloudinary(getPublicId(videoInfo.thumbnail));
+    await deleteVideoFromDb(vidId, password);
+    return res
+      .status(200)
+      .json(new ApiResponse(200, "Video Deleted Successfully", { vidId }));
+  } catch (err: unknown) {
+    if (err instanceof ApiError) {
+      return res.status(err.statusCode).json(err);
+    } else if (err instanceof Error && err.message === "cloudinaryDelErr") {
       return res.status(500).json(new ApiError(500, "cloudinary error"));
     } else {
       return res.status(500).json(new ApiError(500));
