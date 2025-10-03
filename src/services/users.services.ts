@@ -2,6 +2,8 @@ import jwt from "jsonwebtoken";
 import { User } from "../models/user.model";
 import { payload, userLoginType, userSignUpType } from "../types";
 import { compare, hash } from "bcrypt";
+import mongoose from "mongoose";
+import { ApiError } from "../utils/ApiError";
 
 export const createUser = async (user: userSignUpType) => {
   const newUser = new User({
@@ -38,4 +40,17 @@ export const loginUser = async (user: userLoginType) => {
   );
 
   return { accessToken, refreshToken };
+};
+
+export const updateWatchHistory = async (
+  user: payload,
+  vidId: mongoose.Types.ObjectId
+) => {
+  try {
+    await User.findByIdAndUpdate(user._id, {
+      $addToSet: { watchHistory: vidId },
+    }).orFail();
+  } catch (err: unknown) {
+    throw new ApiError(500, "Error occured while updating watch history");
+  }
 };
