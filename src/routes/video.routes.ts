@@ -13,7 +13,6 @@ import {
   videoUpdateSchema,
 } from "../validators/videoUpdate";
 import validateParams from "../middlewares/validateParams";
-import { videoDeleteSchema } from "../validators/videoDelete";
 
 const router = Router();
 
@@ -46,7 +45,6 @@ router.put(
 router.delete(
   "/delete/:vidId",
   authorizeUser(["user", "admin"]),
-  validateRequest(videoDeleteSchema),
   validateParams(videoUpdateParamsSchema),
   deleteVideoC
 );

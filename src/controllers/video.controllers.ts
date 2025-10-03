@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import {
   payload,
-  videoDeleteType,
   videoUpdateParamsType,
   videoUpdateType,
   videoUploadType,
@@ -79,7 +78,7 @@ export const updateVideoInfoC = async (
     const vidId = new mongoose.Types.ObjectId(req.params.vidId);
     const { title, description } = req.body;
     const thumbnail = req.file;
-
+    const user = req.user;
     if (title || description || thumbnail) {
       const updatePayload: Record<string, any> = {};
 
@@ -96,7 +95,11 @@ export const updateVideoInfoC = async (
         updatePayload.thumbnail = updatedThumbnail.url;
       }
 
-      const updatedVideo = await updateVideoInfo(vidId, updatePayload);
+      const updatedVideo = await updateVideoInfo(
+        vidId,
+        updatePayload,
+        user as payload
+      );
 
       return res
         .status(200)
@@ -121,19 +124,23 @@ export const updateVideoInfoC = async (
 };
 
 export const deleteVideoC = async (
-  req: Request<videoUpdateParamsType, {}, videoDeleteType>,
+  req: Request<videoUpdateParamsType, {}, {}>,
   res: Response
 ) => {
   try {
-    const { password } = req.body;
+    const user = req.user as payload;
     const vidId = new mongoose.Types.ObjectId(req.params.vidId);
     const videoInfo = await getVideoInfo(vidId);
-    await deleteFromCloudinary(getPublicId(videoInfo.videoSrc), "video");
-    await deleteFromCloudinary(getPublicId(videoInfo.thumbnail));
-    await deleteVideoFromDb(vidId, password);
-    return res
-      .status(200)
-      .json(new ApiResponse(200, "Video Deleted Successfully", { vidId }));
+    if (videoInfo.owner == user._id || user.role === "admin") {
+      await deleteFromCloudinary(getPublicId(videoInfo.videoSrc), "video");
+      await deleteFromCloudinary(getPublicId(videoInfo.thumbnail));
+      await deleteVideoFromDb(vidId);
+      return res
+        .status(200)
+        .json(new ApiResponse(200, "Video Deleted Successfully", { vidId }));
+    } else {
+      throw new ApiError(401, "Unauthorized");
+    }
   } catch (err: unknown) {
     if (err instanceof ApiError) {
       return res.status(err.statusCode).json(err);

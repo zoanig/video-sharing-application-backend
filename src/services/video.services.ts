@@ -36,7 +36,8 @@ export const getVideoInfo = async (vidId: mongoose.Types.ObjectId) => {
 
 export const updateVideoInfo = async (
   vidId: mongoose.Types.ObjectId,
-  updtdInfo: { thumbnail?: string; description?: string; title?: string }
+  updtdInfo: { thumbnail?: string; description?: string; title?: string },
+  user: payload
 ) => {
   try {
     const updatingItems = Object.fromEntries(
@@ -44,42 +45,29 @@ export const updateVideoInfo = async (
         ([key, value]) => value !== undefined || null
       )
     );
-    const updatedVid = await Video.findByIdAndUpdate(vidId, updatingItems, {
-      new: true,
-    }).orFail();
-    return updatedVid;
+    const video = await Video.findById(vidId).orFail();
+    if (video.owner == user._id || user.role === "admin") {
+      const updatedVid = await Video.findByIdAndUpdate(vidId, updatingItems, {
+        new: true,
+      }).orFail();
+      return updatedVid;
+    } else {
+      throw new ApiError(401, "Unauhorized");
+    }
   } catch (err: unknown) {
     if (err instanceof mongoose.Error.DocumentNotFoundError) {
       throw new ApiError(404, "Video Not Found");
+    } else if (err instanceof ApiError) {
+      throw err;
     } else {
       throw new ApiError(500, "An error occured while updating the video");
     }
   }
 };
 
-export const deleteVideoFromDb = async (
-  vidId: mongoose.Types.ObjectId,
-  password: string
-) => {
+export const deleteVideoFromDb = async (vidId: mongoose.Types.ObjectId) => {
   try {
     const video = await Video.findById(vidId).orFail();
-    const videoInfo = await Video.aggregate([
-      { $match: { _id: vidId } },
-      {
-        $lookup: {
-          from: "users",
-          localField: "owner",
-          foreignField: "_id",
-          as: "owner",
-        },
-      },
-    ]);
-    if (!videoInfo || !videoInfo[0].owner[0].password) {
-      throw new ApiError(500, "Error occured while lookup");
-    }
-    if (!(await bcrypt.compare(password, videoInfo[0].owner[0].password))) {
-      throw new ApiError(401, "Incorrect Password");
-    }
     await Video.findByIdAndDelete(vidId).orFail();
   } catch (err: unknown) {
     if (err instanceof ApiError) {
