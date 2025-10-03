@@ -16,9 +16,11 @@ import {
   getVideoInfo,
   storeVideo,
   updateVideoInfo,
+  viewVideo,
 } from "../services/video.services";
 import mongoose from "mongoose";
 import { ApiResponse } from "../utils/ApiResponse";
+import { updateWatchHistory } from "../services/users.services";
 
 export const publishVideo = async (
   req: Request<{}, {}, videoUploadType>,
@@ -146,6 +148,28 @@ export const deleteVideoC = async (
       return res.status(err.statusCode).json(err);
     } else if (err instanceof Error && err.message === "cloudinaryDelErr") {
       return res.status(500).json(new ApiError(500, "cloudinary error"));
+    } else {
+      return res.status(500).json(new ApiError(500));
+    }
+  }
+};
+
+export const getVideoC = async (
+  req: Request<videoUpdateParamsType, {}, {}>,
+  res: Response
+) => {
+  try {
+    const vidId = new mongoose.Types.ObjectId(req.params.vidId);
+    const video = await viewVideo(vidId);
+    if (req.user) {
+      await updateWatchHistory(req.user, vidId);
+    }
+    return res
+      .status(200)
+      .json(new ApiResponse(200, "Got The Video", { video }));
+  } catch (err: unknown) {
+    if (err instanceof ApiError) {
+      return res.status(err.statusCode).json(err);
     } else {
       return res.status(500).json(new ApiError(500));
     }

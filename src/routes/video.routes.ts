@@ -4,6 +4,7 @@ import validateRequest from "../middlewares/validateRequest";
 import { videoUploadSchema } from "../validators/videoUpload";
 import {
   deleteVideoC,
+  getVideoC,
   publishVideo,
   updateVideoInfoC,
 } from "../controllers/video.controllers";
@@ -13,6 +14,7 @@ import {
   videoUpdateSchema,
 } from "../validators/videoUpdate";
 import validateParams from "../middlewares/validateParams";
+import { softAuthUser } from "../middlewares/softAuthUser";
 
 const router = Router();
 
@@ -47,6 +49,13 @@ router.delete(
   authorizeUser(["user", "admin"]),
   validateParams(videoUpdateParamsSchema),
   deleteVideoC
+);
+
+router.get(
+  "/view/:vidId",
+  softAuthUser,
+  validateParams(videoUpdateParamsSchema),
+  getVideoC
 );
 
 export default router;
