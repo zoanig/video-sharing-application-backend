@@ -19,7 +19,7 @@ export const creatComment = async (
         replyTo: id,
         video: comment.video,
       });
-      await reply.populate("owner", "username avatar -_id");
+      await reply.populate("owner", "username avatar _id");
       return reply;
     } else {
       const comment = await Comment.create({
@@ -27,7 +27,7 @@ export const creatComment = async (
         owner: user._id,
         video: id,
       });
-      await comment.populate("owner", "username avatar -_id");
+      await comment.populate("owner", "username avatar _id");
       return comment;
     }
   } catch (err: unknown) {

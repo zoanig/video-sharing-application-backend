@@ -83,7 +83,7 @@ export const deleteVideoFromDb = async (vidId: mongoose.Types.ObjectId) => {
 export const viewVideo = async (vidId: mongoose.Types.ObjectId) => {
   try {
     const video = await Video.findById(vidId)
-      .populate("owner", "username avatar -_id")
+      .populate("owner", "username avatar _id")
       .orFail();
     video.views += 1;
     video.save();
