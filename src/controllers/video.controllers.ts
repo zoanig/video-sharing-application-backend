@@ -77,7 +77,7 @@ export const updateVideoInfoC = async (
   res: Response
 ) => {
   try {
-    const vidId = new mongoose.Types.ObjectId(req.params.vidId);
+    const vidId = new mongoose.Types.ObjectId(req.params.Id);
     const { title, description } = req.body;
     const thumbnail = req.file;
     const user = req.user;
@@ -131,7 +131,7 @@ export const deleteVideoC = async (
 ) => {
   try {
     const user = req.user as payload;
-    const vidId = new mongoose.Types.ObjectId(req.params.vidId);
+    const vidId = new mongoose.Types.ObjectId(req.params.Id);
     const videoInfo = await getVideoInfo(vidId);
     if (videoInfo.owner == user._id || user.role === "admin") {
       await deleteFromCloudinary(getPublicId(videoInfo.videoSrc), "video");
@@ -159,7 +159,7 @@ export const getVideoC = async (
   res: Response
 ) => {
   try {
-    const vidId = new mongoose.Types.ObjectId(req.params.vidId);
+    const vidId = new mongoose.Types.ObjectId(req.params.Id);
     const video = await viewVideo(vidId);
     if (req.user) {
       await updateWatchHistory(req.user, vidId);

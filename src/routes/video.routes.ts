@@ -36,7 +36,7 @@ router.post(
 );
 
 router.put(
-  "/update/:vidId",
+  "/update/:Id",
   authorizeUser(["user", "admin"]),
   upload.single("thumbnail"),
   validateParams(videoUpdateParamsSchema),
@@ -45,14 +45,14 @@ router.put(
 );
 
 router.delete(
-  "/delete/:vidId",
+  "/delete/:Id",
   authorizeUser(["user", "admin"]),
   validateParams(videoUpdateParamsSchema),
   deleteVideoC
 );
 
 router.get(
-  "/view/:vidId",
+  "/view/:Id",
   softAuthUser,
   validateParams(videoUpdateParamsSchema),
   getVideoC

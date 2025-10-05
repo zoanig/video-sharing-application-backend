@@ -6,5 +6,5 @@ export const videoUpdateSchema = z.object({
 });
 
 export const videoUpdateParamsSchema = z.object({
-  vidId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Video Id format"),
+  Id: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Video Id format"),
 });
