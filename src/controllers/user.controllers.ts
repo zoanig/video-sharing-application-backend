@@ -1,6 +1,10 @@
 import { Request, Response } from "express";
-import { userLoginType, userSignUpType } from "../types";
-import { createUser, loginUser } from "../services/users.services";
+import { refreshTokenType, userLoginType, userSignUpType } from "../types";
+import {
+  createUser,
+  loginUser,
+  refreshAccessToken,
+} from "../services/users.services";
 import { ApiResponse } from "../utils/ApiResponse";
 import mongoose from "mongoose";
 import { ApiError } from "../utils/ApiError";
@@ -65,6 +69,25 @@ export const userLogin = async (
       return res
         .status(500)
         .json(new ApiError(500, "Something went wroong", [err]));
+    }
+  }
+};
+
+export const refreshUserToken = async (
+  req: Request<{}, {}, refreshTokenType>,
+  res: Response
+) => {
+  try {
+    const { refreshToken } = req.body;
+    const newAccessToken = refreshAccessToken(refreshToken);
+    return res
+      .status(200)
+      .json(new ApiResponse(200, "Successfull", { newAccessToken }));
+  } catch (err: unknown) {
+    if (err instanceof ApiError) {
+      return res.status(err.statusCode).json(err);
+    } else {
+      return res.status(500).json(500);
     }
   }
 };
