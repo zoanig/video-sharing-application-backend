@@ -42,6 +42,23 @@ export const loginUser = async (user: userLoginType) => {
   return { accessToken, refreshToken };
 };
 
+export const refreshAccessToken = (token: string) => {
+  try {
+    const user = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET as string);
+    const newAccessToken = jwt.sign(
+      user,
+      process.env.ACCESS_TOKEN_SECRET as string
+    );
+    return { newAccessToken };
+  } catch (err: unknown) {
+    if (err instanceof jwt.TokenExpiredError) {
+      throw new ApiError(400, "Jwt Token is Expired. Log in again.");
+    } else if (err instanceof jwt.JsonWebTokenError) {
+      throw new ApiError(400, "Invalid jwt Token");
+    }
+  }
+};
+
 export const updateWatchHistory = async (
   user: payload,
   vidId: mongoose.Types.ObjectId
