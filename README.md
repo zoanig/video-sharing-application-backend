@@ -156,54 +156,52 @@ When the access token expires, request a new one using the refresh token endpoin
 
 ## API Summary
 
-### User
+Here is your entire API structure rewritten uniformly as **lists**:
 
-| Method | Endpoint          |
-| ------ | ----------------- |
-| POST   | /api/user/signup  |
-| POST   | /api/user/login   |
-| PUT    | /api/user/refresh |
-| PUT    | /api/user/profile |
+---
 
-### Video
+## User
 
-| Method | Endpoint              |
-| ------ | --------------------- |
-| POST   | /api/video/upload     |
-| PUT    | /api/video/update/:Id |
-| GET    | /api/video/view/:Id   |
-| DELETE | /api/video/delete/:Id |
+* **POST** `/api/user/signup`
+* **POST** `/api/user/login`
+* **PUT** `/api/user/refresh`
+* **PUT** `/api/user/profile`
 
-### Playlist
+## Video
 
-| Method | Endpoint             |
-| ------ | -------------------- |
-| POST   | /api/playlist/create |
-| PUT    | /api/playlist/:Id    |
-| DELETE | /api/playlist/:Id    |
-| GET    | /api/playlist/:Id    |
-| GET    | /api/playlist/getall |
+* **POST** `/api/video/upload`
+* **PUT** `/api/video/update/:Id`
+* **GET** `/api/video/view/:Id`
+* **DELETE** `/api/video/delete/:Id`
 
-### Social
+## Playlist
 
-Comments
+* **POST** `/api/playlist/create`
+* **PUT** `/api/playlist/:Id`
+* **DELETE** `/api/playlist/:Id`
+* **GET** `/api/playlist/:Id`
+* **GET** `/api/playlist/getall`
 
-* POST `/api/comment/:Id`
-* POST `/api/comment/reply/:Id`
-* PUT `/api/comment/:Id`
-* DELETE `/api/comment/:Id`
+## Social
 
-Likes
+### Comments
 
-* PUT `/api/like/video/:Id`
-* DELETE `/api/like/video/:Id`
-* PUT `/api/like/comment/:Id`
-* DELETE `/api/like/comment/:Id`
+* **POST** `/api/comment/:Id`
+* **POST** `/api/comment/reply/:Id`
+* **PUT** `/api/comment/:Id`
+* **DELETE** `/api/comment/:Id`
 
-Subscriptions
+### Likes
 
-* PUT `/api/subscription/:Id`
-* DELETE `/api/subscription/:Id`
+* **PUT** `/api/like/video/:Id`
+* **DELETE** `/api/like/video/:Id`
+* **PUT** `/api/like/comment/:Id`
+* **DELETE** `/api/like/comment/:Id`
+
+### Subscriptions
+
+* **PUT** `/api/subscription/:Id`
+* **DELETE** `/api/subscription/:Id`
 
 
 ## Uploads
